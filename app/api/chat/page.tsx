@@ -1,4 +1,4 @@
-"use client"; // Important: This makes it a Client Component
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 
@@ -37,6 +37,7 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
+      // UPDATED FETCH URL HERE:
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,7 +86,6 @@ export default function ChatPage() {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-6">
-           {/* Static History Items for visual structure */}
           <div className="flex flex-col gap-1">
             <p className="px-3 text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Today</p>
             <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-dark text-white group cursor-pointer transition-colors">
