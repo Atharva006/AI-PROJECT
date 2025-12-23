@@ -32,12 +32,12 @@ export default function ChatPage() {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setInput("");
+    setInput(""); // Clear input
     setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
     setIsLoading(true);
 
     try {
-      // UPDATED FETCH URL HERE:
+      // Fetch from the new API route we created in Step 2
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
