@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
-// Define message type
 type Message = {
   role: "user" | "model";
   text: string;
@@ -19,7 +18,6 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -32,12 +30,11 @@ export default function ChatPage() {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setInput(""); // Clear input
+    setInput("");
     setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
     setIsLoading(true);
 
     try {
-      // Fetch from the new API route we created in Step 2
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -47,15 +44,31 @@ export default function ChatPage() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (data.text) {
+      if (data.error) {
+        setMessages((prev) => [
+          ...prev, 
+          { role: "model", text: `Error: ${data.error}. ${data.details || ''}` }
+        ]);
+      } else if (data.text) {
         setMessages((prev) => [...prev, { role: "model", text: data.text }]);
       } else {
-        console.error("No response text found");
+        setMessages((prev) => [
+          ...prev, 
+          { role: "model", text: "Sorry, I couldn't get a response. Please try again." }
+        ]);
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev, 
+        { role: "model", text: "Connection error. Please check your internet and try again." }
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +83,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display">
-      {/* Sidebar - Hidden on mobile */}
+      {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-[280px] h-full border-r border-border-dark bg-[#0d191c] shrink-0">
         <div className="p-5 pb-2">
           <div className="flex items-center gap-3 mb-6 text-primary">
@@ -78,7 +91,10 @@ export default function ChatPage() {
             <h1 className="text-xl font-bold tracking-tight text-white">Career AI</h1>
           </div>
           <button 
-            onClick={() => setMessages([])} 
+            onClick={() => setMessages([{
+              role: "model",
+              text: "Hello! 👋 I'm ready to help you navigate your career path. Are you looking for advice on resumes, interview prep, or exploring new fields like Data Science?",
+            }])} 
             className="flex w-full items-center justify-center gap-2 rounded-xl h-11 px-4 bg-primary hover:bg-primary-hover text-[#102023] text-sm font-bold transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">add</span>
@@ -101,7 +117,7 @@ export default function ChatPage() {
             </div>
             <div className="flex flex-col overflow-hidden">
               <p className="text-white text-sm font-medium truncate">User</p>
-              <p className="text-primary text-xs truncate">Free Plan</p>
+              <p className="text-primary text-xs truncate">Pro Plan</p>
             </div>
             <span className="material-symbols-outlined text-slate-400 ml-auto text-[20px]">settings</span>
           </div>
@@ -120,7 +136,7 @@ export default function ChatPage() {
           </div>
           <div className="hidden md:flex items-center gap-2">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">AI Career Assistant</h2>
-            <span className="bg-[#224249] text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Beta</span>
+            <span className="bg-[#224249] text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Pro</span>
           </div>
         </header>
 
