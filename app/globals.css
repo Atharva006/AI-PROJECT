@@ -2,14 +2,17 @@
 
 @theme {
   --color-primary: #0dccf2;
+  --color-primary-hover: #0bb8da; /* Added */
   --color-primary-dark: #0ab8da;
   --color-secondary: #315f68;
   
-  --color-background-light: #f0f4f5;
-  --color-background-dark: #102023;
+  --color-background-light: #f5f8f8; /* Updated to match chat design slightly better */
+  --color-background-dark: #101f22; /* Updated to match chat design */
   
-  --color-surface-dark: #182f34;
+  --color-surface-dark: #162a2f; /* Updated for chat sidebar */
   --color-surface-light: #ffffff;
+  
+  --color-border-dark: #224249; /* Added */
   
   --color-text-main: #ffffff;
   --color-text-muted: #90c1cb;
@@ -18,15 +21,19 @@
   --font-body: "Noto Sans", sans-serif;
 }
 
-/* In Tailwind v4, variables defined in @theme are automatically 
-   available as utility classes (e.g., bg-surface-dark).
-*/
-
 @layer components {
   .glass-panel {
     @apply bg-surface-dark/70 backdrop-blur-xl border border-secondary/50;
   }
   .glass-panel:hover {
     @apply bg-surface-dark/90 border-primary/50;
+  }
+  /* Helper for hiding scrollbar but allowing scroll */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

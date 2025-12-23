@@ -24,9 +24,9 @@ export default function Home() {
             <button className="hidden md:flex h-9 items-center justify-center rounded-lg border border-[#cbd5e1] dark:border-[#315f68] px-4 text-sm font-bold text-[#102023] dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
               Sign In
             </button>
-            <button className="flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-[#102023] shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
-              Get Started
-            </button>
+          <a href="/chat" className="flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-[#102023] shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
+  Get Started
+</a>
             {/* Mobile Menu Button */}
             <button className="md:hidden flex size-9 items-center justify-center rounded-lg text-[#102023] dark:text-white">
               <span className="material-symbols-outlined">menu</span>
