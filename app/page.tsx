@@ -16,9 +16,11 @@ export default function Home() {
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">Home</a>
-            <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">Career Paths</a>
-            <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">Resources</a>
-            <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">About</a>
+            <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="/roles/machine-learning-engineer">Machine-Learning-Engineer</a>
+            <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">Resume Analyzer</a>
+            <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="/roadmap">Skill's Roadmap</a>
+             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">Community</a>
+             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">About Us</a>
           </nav>
           <div className="flex items-center gap-4">
             <button className="hidden md:flex h-9 items-center justify-center rounded-lg border border-[#cbd5e1] dark:border-[#315f68] px-4 text-sm font-bold text-[#102023] dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
@@ -50,7 +52,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
-                New Roadmap 2024 Available
+                New Roadmap 2026 Available
               </div>
               <h1 className="text-4xl font-black tracking-tighter text-[#102023] dark:text-white sm:text-5xl md:text-6xl lg:text-7xl">
                 Find your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-teal-400">AI career path</span>

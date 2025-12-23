@@ -36,4 +36,8 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .drag-pattern {
+    background-image: radial-gradient(#224249 1px, transparent 1px);
+    background-size: 12px 12px;
+  }
 }
