@@ -1,30 +1,28 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: "API Key not found" }, { status: 500 });
+  // Static list of Perplexity models
+  // You can update this list as Perplexity releases new models
+  const models = [
+    { 
+      name: "sonar-pro", 
+      displayName: "Sonar Pro", 
+      description: "Perplexity's most capable model (Search & Reasoning)" 
+    },
+    { 
+      name: "sonar", 
+      displayName: "Sonar", 
+      description: "Efficient search-based model" 
+    },
+    { 
+      name: "sonar-reasoning-pro", 
+      displayName: "Sonar Reasoning Pro", 
+      description: "High-reasoning model (similar to o1)" 
     }
+  ];
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const models = await genAI.listModels();
-    
-    const availableModels = models.map(m => ({
-      name: m.name,
-      displayName: m.displayName,
-      description: m.description,
-    }));
-
-    return NextResponse.json({ 
-      count: availableModels.length,
-      models: availableModels 
-    });
-
-  } catch (error: any) {
-    return NextResponse.json({ 
-      error: error?.message || String(error) 
-    }, { status: 500 });
-  }
+  return NextResponse.json({ 
+    count: models.length,
+    models: models 
+  });
 }
