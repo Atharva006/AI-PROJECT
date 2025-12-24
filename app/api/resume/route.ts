@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+
+// 1. USE REQUIRE INSTEAD OF IMPORT (Fixes "Export default" error)
 // @ts-ignore
-import pdf from "pdf-parse";
+const pdf = require("pdf-parse");
 
 export async function POST(req: Request) {
   try {
@@ -11,34 +13,37 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // 1. Extract Text from PDF
+    // 2. Extract Text from PDF
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const pdfData = await pdf(buffer);
     const resumeText = pdfData.text;
 
-    // 2. Prepare Prompt for Perplexity
+    if (!resumeText || resumeText.trim().length === 0) {
+      return NextResponse.json({ error: "Could not read text from this PDF." }, { status: 400 });
+    }
+
+    // 3. Prepare Prompt for Perplexity
     const systemPrompt = `
       You are an expert AI Career Coach. Analyze the resume provided.
-      Return ONLY a valid JSON object (no markdown formatting) with this exact structure:
+      Return ONLY a valid JSON object (no markdown formatting, no code blocks) with this exact structure:
       {
-        "score": number (0-100),
+        "score": number,
         "techStack": ["string", "string"],
         "improvements": [{"title": "string", "description": "string"}],
         "suggestedRoles": [{"role": "string", "match": "string"}]
       }
-      If information is missing, make reasonable inferences based on standard career paths.
+      If information is missing, make reasonable inferences.
     `;
 
     const userMessage = `Analyze this resume content:\n\n${resumeText}`;
 
-    // 3. Call Perplexity API
     const apiKey = process.env.PERPLEXITY_API_KEY;
-    
     if (!apiKey) {
-        throw new Error("PERPLEXITY_API_KEY is not defined in .env.local");
+      return NextResponse.json({ error: "Perplexity API Key missing in .env.local" }, { status: 500 });
     }
 
+    // 4. Call Perplexity API
     const response = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: {
@@ -57,23 +62,30 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Perplexity API Error: ${response.status} - ${errorText}`);
+      console.error("Perplexity API Error:", errorText);
+      throw new Error(`API Error: ${response.status}`);
     }
 
     const data = await response.json();
     let rawContent = data.choices[0]?.message?.content || "";
 
-    // Cleanup: Remove markdown code blocks if present
+    // 5. Cleanup & Parse JSON
     rawContent = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    const analysis = JSON.parse(rawContent);
+    let analysis;
+    try {
+      analysis = JSON.parse(rawContent);
+    } catch (e) {
+      console.error("JSON Parse Error. Raw content:", rawContent);
+      return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
+    }
 
     return NextResponse.json(analysis);
 
   } catch (error: any) {
     console.error("Resume Analysis Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to analyze resume" },
+      { error: error.message || "Internal Server Error" },
       { status: 500 }
     );
   }
