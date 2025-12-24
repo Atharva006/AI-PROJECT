@@ -21,10 +21,7 @@ export default function ResumeAnalyzer() {
     }
   };
 
-  const handleAnalyze = async (e: React.MouseEvent) => {
-    // Prevent the click from bubbling up to the file input
-    e.stopPropagation(); 
-    
+  const handleAnalyze = async () => {
     if (!file) return;
 
     setLoading(true);
@@ -69,20 +66,17 @@ export default function ResumeAnalyzer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* LEFT COLUMN: Upload Area */}
-          <div className="lg:col-span-7">
-            {/* Added 'relative' to container */}
-            <div className="border-2 border-dashed border-slate-300 dark:border-[#315f68] bg-slate-50 dark:bg-[#162a2f] rounded-xl p-10 flex flex-col items-center justify-center gap-6 relative overflow-hidden group">
-              
-              {/* HIDDEN INPUT: Now explicitly placed with z-10 */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* Upload Zone */}
+            <label className="border-2 border-dashed border-slate-300 dark:border-[#315f68] bg-slate-50 dark:bg-[#162a2f] rounded-xl p-10 flex flex-col items-center justify-center gap-6 cursor-pointer hover:border-primary transition-colors">
               <input 
                 type="file" 
                 accept=".pdf"
                 onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                className="hidden"
               />
-
-              {/* CONTENT: Placed in a container with pointer-events-none so clicks pass through to input... */}
-              <div className="z-20 text-center space-y-4 relative pointer-events-none">
+              
+              <div className="text-center space-y-4">
                 <div className="bg-[#1e363c] p-4 rounded-full inline-flex">
                   <span className="material-symbols-outlined text-4xl text-primary">cloud_upload</span>
                 </div>
@@ -93,27 +87,32 @@ export default function ResumeAnalyzer() {
                   {!file && <p className="text-sm text-slate-500">Click to browse files</p>}
                 </div>
               </div>
+            </label>
 
-              {/* BUTTON: High z-index (z-30) and pointer-events-auto to make it clickable */}
-              <button 
-                onClick={handleAnalyze}
-                disabled={!file || loading}
-                className={`relative z-30 flex items-center justify-center gap-2 rounded-lg h-12 px-8 font-bold transition-all pointer-events-auto ${
-                  loading 
-                    ? "bg-slate-500 cursor-not-allowed" 
-                    : "bg-primary text-[#102023] hover:shadow-[0_0_20px_rgba(13,204,242,0.5)] hover:-translate-y-0.5"
-                }`}
-              >
-                {loading ? (
-                  <>Processing...</>
-                ) : (
-                  <>
-                    <span>Analyze Resume</span>
-                    <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                  </>
-                )}
-              </button>
-            </div>
+            {/* Analyze Button - Separated from upload zone */}
+            <button 
+              onClick={handleAnalyze}
+              disabled={!file || loading}
+              className={`w-full flex items-center justify-center gap-2 rounded-lg h-12 px-8 font-bold transition-all ${
+                loading 
+                  ? "bg-slate-500 cursor-not-allowed" 
+                  : file
+                  ? "bg-primary text-[#102023] hover:shadow-[0_0_20px_rgba(13,204,242,0.5)] hover:-translate-y-0.5"
+                  : "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
+              }`}
+            >
+              {loading ? (
+                <>
+                  <span className="animate-spin material-symbols-outlined">progress_activity</span>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <span>Analyze Resume</span>
+                  <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* RIGHT COLUMN: Results Dashboard */}
@@ -171,6 +170,24 @@ export default function ResumeAnalyzer() {
                     ))}
                   </div>
                 </div>
+
+                {/* Suggested Roles */}
+                {result.suggestedRoles && result.suggestedRoles.length > 0 && (
+                  <div className="bg-white dark:bg-[#162a2f] rounded-xl p-6 border border-slate-200 dark:border-[#224249]">
+                    <h3 className="font-bold mb-4 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">stars</span>
+                      Suggested Roles
+                    </h3>
+                    <div className="space-y-3">
+                      {result.suggestedRoles.map((item, i) => (
+                        <div key={i} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-[#1e363c]">
+                          <span className="font-medium">{item.role}</span>
+                          <span className="text-sm text-primary">{item.match}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div className="h-full flex items-center justify-center text-slate-500 border border-dashed border-slate-300 dark:border-[#315f68] rounded-xl p-8">

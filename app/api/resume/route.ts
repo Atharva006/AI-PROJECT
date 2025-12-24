@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-
-// 1. USE REQUIRE INSTEAD OF IMPORT (Fixes "Export default" error)
 // @ts-ignore
-const pdf = require("pdf-parse");
+import pdf from "pdf-parse";
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -82,7 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(analysis);
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Resume Analysis Error:", error);
     return NextResponse.json(
       { error: error.message || "Internal Server Error" },
