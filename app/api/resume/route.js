@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-// @ts-ignore
 import pdf from "pdf-parse";
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -70,7 +69,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(analysis);
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Resume Analysis Error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to analyze resume" },
