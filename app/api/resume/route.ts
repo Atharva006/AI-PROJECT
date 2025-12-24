@@ -1,27 +1,16 @@
 import { NextResponse } from "next/server";
-// @ts-ignore
-import pdf from "pdf-parse";
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
-    const formData = await req.formData();
-    const file = formData.get("file");
+    // 1. Get the text directly from the JSON body
+    const body = await req.json();
+    const { resumeText } = body;
 
-    if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    if (!resumeText || typeof resumeText !== "string" || resumeText.trim().length === 0) {
+      return NextResponse.json({ error: "Please paste your resume text." }, { status: 400 });
     }
 
-    // 2. Extract Text from PDF
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const pdfData = await pdf(buffer);
-    const resumeText = pdfData.text;
-
-    if (!resumeText || resumeText.trim().length === 0) {
-      return NextResponse.json({ error: "Could not read text from this PDF." }, { status: 400 });
-    }
-
-    // 3. Prepare Prompt for Perplexity
+    // 2. Prepare Prompt for Perplexity
     const systemPrompt = `
       You are an expert AI Career Coach. Analyze the resume provided.
       Return ONLY a valid JSON object (no markdown formatting, no code blocks) with this exact structure:
@@ -41,7 +30,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Perplexity API Key missing in .env.local" }, { status: 500 });
     }
 
-    // 4. Call Perplexity API
+    // 3. Call Perplexity API
     const response = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: {
@@ -67,7 +56,7 @@ export async function POST(req) {
     const data = await response.json();
     let rawContent = data.choices[0]?.message?.content || "";
 
-    // 5. Cleanup & Parse JSON
+    // 4. Cleanup & Parse JSON
     rawContent = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
 
     let analysis;
@@ -80,7 +69,7 @@ export async function POST(req) {
 
     return NextResponse.json(analysis);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Resume Analysis Error:", error);
     return NextResponse.json(
       { error: error.message || "Internal Server Error" },

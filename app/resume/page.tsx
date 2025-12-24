@@ -1,201 +1,141 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState } from "react";
+import Navbar from "@/app/components/Navbar"; // Adjust path if needed
 
-// Define the shape of our data
-interface AnalysisResult {
-  score: number;
-  techStack: string[];
-  improvements: { title: string; description: string }[];
-  suggestedRoles: { role: string; match: string }[];
-}
-
-export default function ResumeAnalyzer() {
-  const [file, setFile] = useState<File | null>(null);
+export default function ResumePage() {
+  const [resumeText, setResumeText] = useState("");
+  const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
+  const [error, setError] = useState("");
 
   const handleAnalyze = async () => {
-    if (!file) return;
+    if (!resumeText.trim()) {
+      setError("Please paste your resume text first.");
+      return;
+    }
 
     setLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    setError("");
+    setAnalysis(null);
 
     try {
       const res = await fetch("/api/resume", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ resumeText }),
       });
-      
-      if (!res.ok) throw new Error("Analysis failed");
-      
+
       const data = await res.json();
-      setResult(data);
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong analyzing the resume.");
+
+      if (!res.ok) {
+        throw new Error(data.error || "Analysis failed");
+      }
+
+      setAnalysis(data);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f8f8] dark:bg-[#101f22] text-slate-900 dark:text-white font-sans">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#224249] bg-white/95 dark:bg-[#102023]/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="flex items-center gap-2 text-primary font-bold text-lg">
-          <span className="material-symbols-outlined">explore</span>
-          AI Career Guide
+    <div className="min-h-screen bg-gray-900 text-white pb-10">
+      <Navbar />
+      
+      <main className="max-w-4xl mx-auto px-4 py-10">
+        <h1 className="text-3xl font-bold mb-2 text-blue-400">AI Resume Review</h1>
+        <p className="text-gray-400 mb-6">
+          Paste your resume text below to get instant feedback on your score, tech stack, and job fit.
+        </p>
+
+        {/* Input Section */}
+        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+          <textarea
+            className="w-full h-64 p-4 bg-gray-900 text-gray-100 rounded-lg border border-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            placeholder="Paste your full resume content here..."
+            value={resumeText}
+            onChange={(e) => setResumeText(e.target.value)}
+          ></textarea>
+
+          {error && <p className="mt-3 text-red-400 text-sm">{error}</p>}
+
+          <button
+            onClick={handleAnalyze}
+            disabled={loading}
+            className={`mt-4 w-full py-3 rounded-lg font-semibold transition-all ${
+              loading
+                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg hover:shadow-blue-500/20"
+            }`}
+          >
+            {loading ? "Analyzing..." : "Analyze Resume"}
+          </button>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-10 py-8 gap-8 flex flex-col">
-        {/* Title */}
-        <section>
-          <h1 className="text-3xl md:text-5xl font-black mb-2">Optimize Your Profile</h1>
-          <p className="text-slate-600 dark:text-[#90c1cb]">Get AI-powered insights for your resume.</p>
-        </section>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* LEFT COLUMN: Upload Area */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* Upload Zone */}
-            <label className="border-2 border-dashed border-slate-300 dark:border-[#315f68] bg-slate-50 dark:bg-[#162a2f] rounded-xl p-10 flex flex-col items-center justify-center gap-6 cursor-pointer hover:border-primary transition-colors">
-              <input 
-                type="file" 
-                accept=".pdf"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              
-              <div className="text-center space-y-4">
-                <div className="bg-[#1e363c] p-4 rounded-full inline-flex">
-                  <span className="material-symbols-outlined text-4xl text-primary">cloud_upload</span>
-                </div>
-                <div>
-                  <p className="text-xl font-bold">
-                    {file ? file.name : "Upload Resume (PDF)"}
-                  </p>
-                  {!file && <p className="text-sm text-slate-500">Click to browse files</p>}
-                </div>
+        {/* Results Section */}
+        {analysis && (
+          <div className="mt-10 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            {/* Score Card */}
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-200">Resume Score</h2>
+                <p className="text-gray-400 text-sm">Based on industry standards</p>
               </div>
-            </label>
+              <div className={`text-4xl font-bold ${
+                analysis.score >= 80 ? "text-green-400" : analysis.score >= 50 ? "text-yellow-400" : "text-red-400"
+              }`}>
+                {analysis.score}/100
+              </div>
+            </div>
 
-            {/* Analyze Button - Separated from upload zone */}
-            <button 
-              onClick={handleAnalyze}
-              disabled={!file || loading}
-              className={`w-full flex items-center justify-center gap-2 rounded-lg h-12 px-8 font-bold transition-all ${
-                loading 
-                  ? "bg-slate-500 cursor-not-allowed" 
-                  : file
-                  ? "bg-primary text-[#102023] hover:shadow-[0_0_20px_rgba(13,204,242,0.5)] hover:-translate-y-0.5"
-                  : "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
-              }`}
-            >
-              {loading ? (
-                <>
-                  <span className="animate-spin material-symbols-outlined">progress_activity</span>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <span>Analyze Resume</span>
-                  <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                </>
-              )}
-            </button>
-          </div>
+            {/* Tech Stack */}
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-blue-300">Detected Tech Stack</h3>
+              <div className="flex flex-wrap gap-2">
+                {analysis.techStack?.map((tech: string, i: number) => (
+                  <span key={i} className="px-3 py-1 bg-gray-700 text-gray-200 rounded-full text-sm">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-          {/* RIGHT COLUMN: Results Dashboard */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            {result ? (
-              <>
-                {/* Score Card */}
-                <div className="bg-white dark:bg-[#162a2f] rounded-xl p-6 border border-slate-200 dark:border-[#224249]">
-                  <div className="flex justify-between items-end mb-4">
+            {/* Improvements */}
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-yellow-300">Areas for Improvement</h3>
+              <ul className="space-y-4">
+                {analysis.improvements?.map((item: any, i: number) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="text-yellow-500 flex-shrink-0">⚠</span>
                     <div>
-                      <h3 className="text-lg font-bold">AI Fit Score</h3>
-                      <p className="text-sm text-slate-500 dark:text-[#90c1cb]">Market relevance</p>
+                      <strong className="text-gray-200 block">{item.title}</strong>
+                      <span className="text-gray-400 text-sm">{item.description}</span>
                     </div>
-                    <span className="text-4xl font-black text-primary">{result.score}%</span>
-                  </div>
-                  <div className="rounded-full h-3 w-full bg-slate-200 dark:bg-[#2a4850] overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: `${result.score}%` }}></div>
-                  </div>
-                </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-                {/* Tech Stack */}
-                <div className="bg-white dark:bg-[#162a2f] rounded-xl p-6 border border-slate-200 dark:border-[#224249]">
-                  <h3 className="font-bold mb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">code</span>
-                    Detected Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {result.techStack.map((skill, i) => (
-                      <span key={i} className="px-3 py-1 rounded-full bg-slate-100 dark:bg-[#224249] text-sm">
-                        {skill}
-                      </span>
-                    ))}
+            {/* Suggested Roles */}
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-green-300">Suggested Roles</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {analysis.suggestedRoles?.map((role: any, i: number) => (
+                  <div key={i} className="bg-gray-700/50 p-4 rounded-lg">
+                    <div className="font-medium text-white">{role.role}</div>
+                    <div className="text-sm text-green-400 mt-1">{role.match} Match</div>
                   </div>
-                </div>
-
-                {/* Improvements */}
-                <div className="bg-white dark:bg-[#162a2f] rounded-xl border border-slate-200 dark:border-[#224249] overflow-hidden">
-                  <div className="p-4 border-b border-slate-200 dark:border-[#224249] bg-slate-50 dark:bg-[#1e363c]">
-                    <h3 className="font-bold flex items-center gap-2">
-                      <span className="material-symbols-outlined text-yellow-400">warning</span>
-                      Areas for Improvement
-                    </h3>
-                  </div>
-                  <div className="divide-y divide-slate-200 dark:divide-[#224249]">
-                    {result.improvements.map((item, i) => (
-                      <div key={i} className="p-4 hover:bg-slate-50 dark:hover:bg-[#1a2f34]">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-1 size-2 rounded-full bg-yellow-400 shrink-0"></div>
-                          <div>
-                            <p className="text-sm font-semibold mb-1">{item.title}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{item.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Suggested Roles */}
-                {result.suggestedRoles && result.suggestedRoles.length > 0 && (
-                  <div className="bg-white dark:bg-[#162a2f] rounded-xl p-6 border border-slate-200 dark:border-[#224249]">
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary">stars</span>
-                      Suggested Roles
-                    </h3>
-                    <div className="space-y-3">
-                      {result.suggestedRoles.map((item, i) => (
-                        <div key={i} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-[#1e363c]">
-                          <span className="font-medium">{item.role}</span>
-                          <span className="text-sm text-primary">{item.match}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="h-full flex items-center justify-center text-slate-500 border border-dashed border-slate-300 dark:border-[#315f68] rounded-xl p-8">
-                <p className="text-center">Upload your resume to see the analysis here.</p>
+                ))}
               </div>
-            )}
+            </div>
+
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

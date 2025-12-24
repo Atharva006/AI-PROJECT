@@ -19,7 +19,7 @@ export default function Home() {
             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="/roles/machine-learning-engineer">Machine-Learning-Engineer</a>
             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="/resume">Resume Analyzer</a>
             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="/roadmap">Skill's Roadmap</a>
-             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">Community</a>
+             <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="/community">Community</a>
              <a className="text-sm font-medium text-[#475569] hover:text-primary dark:text-[#90c1cb] dark:hover:text-white transition-colors" href="#">About Us</a>
           </nav>
           <div className="flex items-center gap-4">
